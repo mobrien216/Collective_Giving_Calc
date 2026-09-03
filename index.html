@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Giving Calculator — The Cleveland Foundation</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+  /* ============================================================
+     Paralucent is a licensed commercial typeface and can't be
+     pulled from a public CDN. Drop the licensed files into a
+     /fonts folder next to this file and these declarations will
+     pick them up automatically. Until then, Poppins renders as
+     the fallback so the page still reads correctly.
+     ============================================================ */
+  @font-face {
+    font-family: 'Paralucent';
+    src: url('./fonts/Paralucent-Bold.woff2') format('woff2'),
+         url('./fonts/Paralucent-Bold.woff') format('woff');
+    font-weight: 700; font-style: normal; font-display: swap;
+  }
+  @font-face {
+    font-family: 'Paralucent';
+    src: url('./fonts/Paralucent-Regular.woff2') format('woff2'),
+         url('./fonts/Paralucent-Regular.woff') format('woff');
+    font-weight: 400; font-style: normal; font-display: swap;
+  }
+
+  :root {
+    --tcf-green-dark:  #164430;
+    --tcf-orange:      #EE7331;
+    --tcf-aqua:        #19B9A9;
+    --tcf-blue:        #1A8DA9;
+    --tcf-pink:        #C0629A;
+
+    --ink:             #16211C;
+    --ink-soft:        #4B564F;
+    --paper:           #FFFFFF;
+    --paper-tint:      #F5F7F5;
+    --line:            #DCE3DF;
+
+    --font-display: 'Paralucent', 'Poppins', 'Segoe UI', sans-serif;
+    --font-sub:     'Paralucent', 'Poppins', 'Segoe UI', sans-serif;
+    --font-body:    'Source Sans 3', 'Source Sans Pro', -apple-system, sans-serif;
+
+    --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
+    --space-5: 24px; --space-6: 32px; --space-7: 48px; --space-8: 64px;
+
+    --radius-sm: 6px; --radius-md: 10px; --radius-pill: 999px;
+    --shadow-sm: 0 1px 2px rgba(22,33,28,0.08);
+    --shadow-md: 0 6px 20px rgba(22,33,28,0.10);
+
+    --container-max: 1200px;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: var(--font-body);
+    color: var(--ink);
+    background: var(--paper-tint);
+    line-height: 1.45;
+  }
+  .wrap { max-width: var(--container-max); margin: 0 auto; padding: 0 var(--space-5); }
+
+  /* ---------- Top bar ---------- */
+  .app-bar {
+    background: var(--tcf-green-dark);
+    color: var(--paper);
+    padding: var(--space-4) 0;
+  }
+  .app-bar .wrap { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; }
+  .app-bar h1 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 22px;
+    margin: 0;
+  }
+  .app-bar p {
+    margin: 0;
+    font-size: 14px;
+    color: #CFE3D8;
+  }
+
+  /* ---------- Layout ---------- */
+  main.calc-wrap {
+    padding: var(--space-5) 0;
+  }
+  .calc-grid {
+    display: grid;
+    grid-template-columns: minmax(300px, 360px) 1fr;
+    gap: var(--space-5);
+    align-items: start;
+  }
+  @media (max-width: 860px) {
+    .calc-grid { grid-template-columns: 1fr; }
+  }
+
+  .panel {
+    background: var(--paper);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    padding: var(--space-5);
+  }
+  .panel-blue { border: 1.5px solid var(--tcf-blue); }
+
+  .eyebrow {
+    font-family: var(--font-sub);
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 11px;
+    color: var(--tcf-blue);
+    margin: 0 0 var(--space-2);
+  }
+  .panel-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 19px;
+    margin: 0 0 var(--space-4);
+  }
+
+  /* ---------- Field groups ---------- */
+  .field { margin-bottom: var(--space-4); }
+  .field:last-child { margin-bottom: 0; }
+  .field-label {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-family: var(--font-sub);
+    font-size: 14px;
+    color: var(--ink);
+    margin-bottom: var(--space-2);
+  }
+  .field-label .value {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 15px;
+  }
+  .text-blue { color: var(--tcf-blue); }
+  .text-aqua { color: var(--tcf-aqua); }
+  .text-pink { color: var(--tcf-pink); }
+  .text-green { color: var(--tcf-green-dark); }
+  .field-caption {
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-top: var(--space-2);
+  }
+
+  /* ---------- Toggle ---------- */
+  .toggle {
+    display: flex;
+    background: var(--paper-tint);
+    border-radius: var(--radius-pill);
+    padding: 3px;
+    gap: 3px;
+  }
+  .toggle button {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-family: var(--font-sub);
+    font-size: 14px;
+    padding: 9px 10px;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    color: var(--ink-soft);
+    transition: background .15s ease, color .15s ease;
+  }
+  .toggle button.active {
+    background: var(--tcf-blue);
+    color: var(--paper);
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* ---------- Amount input ---------- */
+  .amount-input {
+    display: flex; align-items: center;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--paper-tint);
+    padding: 0 var(--space-3);
+    margin-bottom: var(--space-3);
+  }
+  .amount-input span.prefix { color: var(--ink-soft); font-size: 15px; }
+  .amount-input input[type="number"] {
+    border: none; background: transparent; font-family: var(--font-display);
+    font-weight: 700; font-size: 20px; color: var(--ink);
+    padding: 10px var(--space-2); width: 100%; outline: none;
+  }
+  .amount-input span.suffix { color: var(--ink-soft); font-size: 13px; white-space: nowrap; }
+
+  .preset-row { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+  .preset-btn {
+    flex: 1;
+    min-width: 52px;
+    border: 1px solid var(--line);
+    background: var(--paper);
+    color: var(--tcf-blue);
+    font-family: var(--font-sub);
+    font-size: 13px;
+    padding: 8px 4px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: background .15s ease, color .15s ease, border-color .15s ease;
+  }
+  .preset-btn.active {
+    background: var(--tcf-blue);
+    border-color: var(--tcf-blue);
+    color: var(--paper);
+  }
+
+  /* ---------- Sliders ---------- */
+  input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--line);
+    margin: var(--space-2) 0 var(--space-1);
+    --thumb: var(--tcf-pink);
+  }
+  #years, #returnRate { --thumb: var(--tcf-blue); }
+  #payoutRate { --thumb: var(--tcf-pink); }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--thumb);
+    border: 2px solid var(--paper);
+    box-shadow: var(--shadow-sm);
+    cursor: pointer;
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--thumb);
+    border: 2px solid var(--paper);
+    box-shadow: var(--shadow-sm);
+    cursor: pointer;
+  }
+  .range-ticks {
+    display: flex; justify-content: space-between;
+    font-size: 11px; color: var(--ink-soft);
+    padding: 0 2px;
+  }
+  .range-endpoints {
+    display: flex; justify-content: space-between;
+    font-size: 11px; color: var(--ink-soft);
+  }
+
+  /* ---------- Peers field ---------- */
+  .peers-input {
+    display: flex; align-items: center; gap: var(--space-2);
+    border: 1.5px solid var(--tcf-aqua);
+    border-radius: var(--radius-sm);
+    background: var(--paper-tint);
+    padding: 0 var(--space-3);
+  }
+  .peers-input input[type="number"] {
+    border: none; background: transparent; font-family: var(--font-display);
+    font-weight: 700; font-size: 18px; color: var(--ink);
+    padding: 9px var(--space-2); width: 100%; outline: none;
+  }
+
+  /* ---------- Results column ---------- */
+  .results-col { display: flex; flex-direction: column; gap: var(--space-4); }
+  .result-cards { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
+  @media (max-width: 640px) { .result-cards { grid-template-columns: 1fr; } }
+
+  .result-card {
+    border-radius: var(--radius-md);
+    padding: var(--space-5);
+    box-shadow: var(--shadow-sm);
+  }
+  .result-card.light { background: var(--paper); border: 1.5px solid var(--tcf-blue); }
+  .result-card.dark { background: var(--tcf-green-dark); color: var(--paper); border: 1.5px solid var(--tcf-aqua); }
+  .result-card .eyebrow.on-dark { color: var(--tcf-aqua); }
+  .result-card h3 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 17px;
+    margin: 0 0 var(--space-4);
+  }
+  .stat-row { margin-bottom: var(--space-4); }
+  .stat-row:last-child { margin-bottom: 0; }
+  .stat-label {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin: 0 0 2px;
+    opacity: 0.75;
+  }
+  .stat-value {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 26px;
+    margin: 0;
+  }
+  .result-card.light .stat-value.grow { color: var(--tcf-blue); }
+  .result-card.dark .stat-value.grow { color: var(--tcf-aqua); }
+
+  .perpetuity-cta {
+    display: flex; align-items: center; justify-content: center; gap: var(--space-2);
+    width: 100%;
+    background: transparent;
+    border: 1.5px solid var(--tcf-pink);
+    color: var(--tcf-pink);
+    font-family: var(--font-sub);
+    font-size: 14px;
+    padding: 11px 20px;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    transition: background .15s ease, color .15s ease;
+  }
+  .perpetuity-cta:hover { background: var(--tcf-pink); color: var(--paper); }
+  .perpetuity-cta svg { transition: transform .2s ease; }
+  .perpetuity-cta[aria-expanded="true"] svg { transform: rotate(180deg); }
+
+  /* ---------- Perpetuity section (below the fold) ---------- */
+  .perpetuity-section {
+    max-width: var(--container-max);
+    margin: 0 auto var(--space-8);
+    padding: 0 var(--space-5);
+  }
+  .perpetuity-section.hidden { display: none; }
+
+  .perpetuity-panel {
+    background: var(--paper);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+    margin-top: var(--space-5);
+  }
+  .perpetuity-banner {
+    background: var(--tcf-pink);
+    color: var(--paper);
+    padding: var(--space-5);
+    display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap;
+  }
+  .forever-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,0.2);
+    border-radius: var(--radius-pill);
+    padding: 4px 12px;
+    font-family: var(--font-sub);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .perpetuity-banner h2 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 24px;
+    margin: var(--space-2) 0 4px;
+  }
+  .perpetuity-banner p { margin: 0; font-size: 14px; opacity: 0.95; max-width: 520px; }
+
+  .perpetuity-body { padding: var(--space-5); }
+
+  .payout-field {
+    max-width: 360px;
+    margin-bottom: var(--space-5);
+    padding: var(--space-4);
+    background: var(--paper-tint);
+    border-radius: var(--radius-sm);
+    border-left: 3px solid var(--tcf-pink);
+  }
+
+  .chart-legend { display: flex; gap: var(--space-5); flex-wrap: wrap; margin-bottom: var(--space-3); font-size: 13px; color: var(--ink-soft); }
+  .chart-legend .item { display: flex; align-items: center; gap: 6px; }
+  .swatch { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+  .swatch.line { width: 16px; height: 0; border-top: 2px dashed var(--tcf-blue); border-radius: 0; }
+
+  .chart-wrap { width: 100%; overflow: hidden; }
+
+  .impact-total {
+    display: flex; gap: var(--space-6); flex-wrap: wrap;
+    margin-top: var(--space-5);
+    padding-top: var(--space-5);
+    border-top: 1px solid var(--line);
+  }
+  .impact-total .headline .num {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 34px;
+    color: var(--tcf-pink);
+    margin: 0;
+  }
+  .impact-total .headline .lbl { font-size: 13px; color: var(--ink-soft); margin: 0 0 2px; }
+  .impact-total .breakdown { font-size: 14px; color: var(--ink-soft); align-self: center; max-width: 420px; }
+  .impact-total .breakdown strong { color: var(--ink); }
+  .impact-total .breakdown strong.text-aqua { color: var(--tcf-aqua); }
+  .impact-total .breakdown strong.text-green { color: var(--tcf-green-dark); }
+
+  .disclaimer {
+    font-size: 12px; color: var(--ink-soft);
+    margin-top: var(--space-5);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--line);
+  }
+</style>
+</head>
+<body>
+
+<header class="app-bar">
+  <div class="wrap">
+    <h1>Giving Calculator</h1>
+    <p>See what your giving could grow into — and what it could fund, together.</p>
+  </div>
+</header>
+
+<main class="calc-wrap">
+  <div class="wrap">
+    <div class="calc-grid">
+
+      <!-- INPUT PANEL -->
+      <section class="panel panel-blue">
+        <p class="eyebrow">Your gift</p>
+        <h2 class="panel-title">Build your scenario</h2>
+
+        <div class="field">
+          <div class="toggle" role="group" aria-label="Gift frequency">
+            <button type="button" id="btnMonthly" class="active">Monthly</button>
+            <button type="button" id="btnOnetime">One-time</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-label"><span>Gift amount</span></div>
+          <div class="amount-input">
+            <span class="prefix">$</span>
+            <input type="number" id="giftAmount" value="50" min="1" step="1">
+            <span class="suffix" id="amountSuffix">/ month</span>
+          </div>
+          <div class="preset-row">
+            <button type="button" class="preset-btn active" data-amount="25">$25</button>
+            <button type="button" class="preset-btn" data-amount="50">$50</button>
+            <button type="button" class="preset-btn" data-amount="100">$100</button>
+            <button type="button" class="preset-btn" data-amount="250">$250</button>
+            <button type="button" class="preset-btn" data-amount="500">$500</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-label"><span>Time horizon</span><span class="value text-blue" id="yearsValue">5 years</span></div>
+          <input type="range" id="years" min="1" max="30" step="1" value="5">
+          <div class="range-ticks" id="yearTicks"></div>
+        </div>
+
+        <div class="field">
+          <div class="field-label"><span>Expected annual return</span><span class="value text-blue" id="returnValue">8.5%</span></div>
+          <input type="range" id="returnRate" min="7" max="12" step="0.5" value="8.5">
+          <div class="range-endpoints"><span>7%</span><span>12%</span></div>
+          <p class="field-caption">Compounded monthly</p>
+        </div>
+
+        <div class="field">
+          <div class="field-label"><span class="text-aqua">Giving alongside others?</span></div>
+          <div class="peers-input">
+            <input type="number" id="peers" value="80" min="1" step="1">
+            <span class="suffix" style="color:var(--ink-soft); font-size:13px;">people, including you</span>
+          </div>
+          <p class="field-caption">Optional — set to 1 if it's just you</p>
+        </div>
+      </section>
+
+      <!-- RESULTS -->
+      <section class="results-col">
+        <div class="result-cards">
+          <div class="result-card light">
+            <p class="eyebrow">Your impact</p>
+            <h3 id="individualTitle">If you give for 5 years</h3>
+            <div class="stat-row">
+              <p class="stat-label">You'll contribute</p>
+              <p class="stat-value" id="individualContributed">$3,000</p>
+            </div>
+            <div class="stat-row">
+              <p class="stat-label">Grows to</p>
+              <p class="stat-value grow" id="individualFV">$3,722</p>
+            </div>
+          </div>
+
+          <div class="result-card dark">
+            <p class="eyebrow on-dark">Collective impact</p>
+            <h3 id="collectiveTitle">With 80 people giving like you</h3>
+            <div class="stat-row">
+              <p class="stat-label">Contributed together</p>
+              <p class="stat-value" id="collectiveContributed">$240,000</p>
+            </div>
+            <div class="stat-row">
+              <p class="stat-label">Grows to</p>
+              <p class="stat-value grow" id="collectiveFV">$297,770</p>
+            </div>
+          </div>
+        </div>
+
+        <button type="button" class="perpetuity-cta" id="perpetuityToggle" aria-expanded="false" aria-controls="perpetuitySection">
+          <span>See this as a permanent endowment</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+      </section>
+
+    </div>
+  </div>
+</main>
+
+<!-- HIDDEN / BELOW-THE-FOLD: perpetuity feature -->
+<section class="perpetuity-section hidden" id="perpetuitySection">
+  <div class="perpetuity-panel">
+    <div class="perpetuity-banner">
+      <div>
+        <span class="forever-pill">● Forever</span>
+        <h2>Fund this into perpetuity</h2>
+        <p>If your collective gift became an endowed fund granting a share of its value to the community every year, here's how the dollars could work over 30 years.</p>
+      </div>
+    </div>
+    <div class="perpetuity-body">
+      <div class="payout-field">
+        <div class="field-label"><span>Annual payout rate</span><span class="value text-pink" id="payoutValue">5.0%</span></div>
+        <input type="range" id="payoutRate" min="3" max="7" step="0.5" value="5">
+        <div class="range-endpoints"><span>3% (more growth)</span><span>7% (more grants)</span></div>
+        <p class="field-caption">Share of the fund granted out to the community each year</p>
+      </div>
+
+      <div class="chart-legend">
+        <span class="item"><span class="swatch" style="background:var(--tcf-green-dark)"></span>Fund balance, still growing</span>
+        <span class="item"><span class="swatch" style="background:var(--tcf-aqua)"></span>Grants given to the community</span>
+        <span class="item"><span class="swatch line"></span>Total contributed</span>
+      </div>
+      <div class="chart-wrap" id="chartWrap"></div>
+
+      <div class="impact-total">
+        <div class="headline">
+          <p class="lbl">Total impact after 30 years</p>
+          <p class="num" id="totalImpact30">$1,162,911</p>
+        </div>
+        <div class="breakdown" id="impactBreakdown">
+          <strong id="grantsBreak" class="text-aqua">$573,792</strong> granted out to the community, plus <strong id="balanceBreak" class="text-green">$589,119</strong> still working in the fund — based on <span id="peersBreak">80</span> people giving.
+        </div>
+      </div>
+
+      <p class="disclaimer">This is a planning estimate built on the assumptions above — it isn't a guarantee, official projection, or financial advice. Actual investment returns and payout decisions will vary. To talk through setting up an endowed fund, connect with the Cleveland Foundation's gift planning team.</p>
+    </div>
+  </div>
+</section>
+
+<script>
+(function () {
+  // ---------- State ----------
+  let giftType = 'monthly';
+
+  // ---------- Elements ----------
+  const btnMonthly = document.getElementById('btnMonthly');
+  const btnOnetime = document.getElementById('btnOnetime');
+  const giftAmountEl = document.getElementById('giftAmount');
+  const amountSuffix = document.getElementById('amountSuffix');
+  const presetBtns = Array.from(document.querySelectorAll('.preset-btn'));
+  const yearsEl = document.getElementById('years');
+  const yearsValue = document.getElementById('yearsValue');
+  const returnEl = document.getElementById('returnRate');
+  const returnValue = document.getElementById('returnValue');
+  const peersEl = document.getElementById('peers');
+  const payoutEl = document.getElementById('payoutRate');
+  const payoutValue = document.getElementById('payoutValue');
+
+  const individualTitle = document.getElementById('individualTitle');
+  const individualContributed = document.getElementById('individualContributed');
+  const individualFV = document.getElementById('individualFV');
+  const collectiveTitle = document.getElementById('collectiveTitle');
+  const collectiveContributed = document.getElementById('collectiveContributed');
+  const collectiveFV = document.getElementById('collectiveFV');
+
+  const perpetuityToggle = document.getElementById('perpetuityToggle');
+  const perpetuitySection = document.getElementById('perpetuitySection');
+  const chartWrap = document.getElementById('chartWrap');
+  const totalImpact30 = document.getElementById('totalImpact30');
+  const grantsBreak = document.getElementById('grantsBreak');
+  const balanceBreak = document.getElementById('balanceBreak');
+  const peersBreak = document.getElementById('peersBreak');
+
+  // ---------- Helpers ----------
+  function fmtUSD(n) {
+    return '$' + Math.round(n).toLocaleString('en-US');
+  }
+  function fvAnnuity(pmt, mRate, months) {
+    if (mRate === 0) return pmt * months;
+    return pmt * ((Math.pow(1 + mRate, months) - 1) / mRate);
+  }
+  function fvLumpSum(pv, mRate, months) {
+    return pv * Math.pow(1 + mRate, months);
+  }
+  function simulateEndowment(type, periodicAgg, contribYears, annualReturnPct, payoutPct, totalYears) {
+    const mRate = annualReturnPct / 100 / 12;
+    const contribMonths = Math.min(contribYears, totalYears) * 12;
+    let balance = 0, cumContributed = 0, cumGranted = 0;
+    const yearly = [{ year: 0, contributed: 0, granted: 0, balance: 0 }];
+    for (let m = 1; m <= totalYears * 12; m++) {
+      if (type === 'monthly') {
+        if (m <= contribMonths) { balance += periodicAgg; cumContributed += periodicAgg; }
+      } else {
+        if (m === 1) { balance += periodicAgg; cumContributed += periodicAgg; }
+      }
+      balance *= (1 + mRate);
+      if (m % 12 === 0) {
+        const grant = balance * (payoutPct / 100);
+        balance -= grant;
+        cumGranted += grant;
+        yearly.push({ year: m / 12, contributed: cumContributed, granted: cumGranted, balance: balance });
+      }
+    }
+    return yearly;
+  }
+
+  // ---------- Tick marks for time horizon (every 5 years) ----------
+  const yearTicks = document.getElementById('yearTicks');
+  [1, 5, 10, 15, 20, 25, 30].forEach(function (t) {
+    const s = document.createElement('span');
+    s.textContent = t === 1 ? '1 yr' : t + ' yrs';
+    yearTicks.appendChild(s);
+  });
+
+  // ---------- Toggle ----------
+  function setGiftType(type) {
+    giftType = type;
+    btnMonthly.classList.toggle('active', type === 'monthly');
+    btnOnetime.classList.toggle('active', type === 'onetime');
+    amountSuffix.textContent = type === 'monthly' ? '/ month' : 'one-time';
+    recalc();
+  }
+  btnMonthly.addEventListener('click', function () { setGiftType('monthly'); });
+  btnOnetime.addEventListener('click', function () { setGiftType('onetime'); });
+
+  // ---------- Amount presets ----------
+  function syncPresetActive() {
+    const val = String(parseFloat(giftAmountEl.value) || 0);
+    presetBtns.forEach(function (b) {
+      b.classList.toggle('active', b.dataset.amount === val);
+    });
+  }
+  presetBtns.forEach(function (b) {
+    b.addEventListener('click', function () {
+      giftAmountEl.value = b.dataset.amount;
+      syncPresetActive();
+      recalc();
+    });
+  });
+  giftAmountEl.addEventListener('input', function () {
+    syncPresetActive();
+    recalc();
+  });
+
+  // ---------- Sliders ----------
+  yearsEl.addEventListener('input', function () {
+    yearsValue.textContent = yearsEl.value + (yearsEl.value == 1 ? ' year' : ' years');
+    recalc();
+  });
+  returnEl.addEventListener('input', function () {
+    returnValue.textContent = parseFloat(returnEl.value).toFixed(1) + '%';
+    recalc();
+  });
+  payoutEl.addEventListener('input', function () {
+    payoutValue.textContent = parseFloat(payoutEl.value).toFixed(1) + '%';
+    recalc();
+  });
+  peersEl.addEventListener('input', recalc);
+
+  // ---------- Perpetuity toggle ----------
+  perpetuityToggle.addEventListener('click', function () {
+    const isHidden = perpetuitySection.classList.contains('hidden');
+    if (isHidden) {
+      perpetuitySection.classList.remove('hidden');
+      perpetuityToggle.setAttribute('aria-expanded', 'true');
+      perpetuityToggle.querySelector('span').textContent = 'Hide the endowment view';
+      recalc();
+      perpetuitySection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      perpetuitySection.classList.add('hidden');
+      perpetuityToggle.setAttribute('aria-expanded', 'false');
+      perpetuityToggle.querySelector('span').textContent = 'See this as a permanent endowment';
+    }
+  });
+
+  // ---------- Chart rendering ----------
+  function renderChart(yearly) {
+    const W = 760, H = 220, padL = 4, padR = 4, padT = 10, padB = 22;
+    const chartW = W - padL - padR;
+    const chartH = H - padT - padB;
+
+    let maxVal = 0;
+    yearly.forEach(function (y) {
+      maxVal = Math.max(maxVal, y.contributed, y.granted + y.balance);
+    });
+    if (maxVal <= 0) maxVal = 1;
+    // round up to a friendly ceiling
+    const magnitude = Math.pow(10, Math.floor(Math.log10(maxVal)));
+    maxVal = Math.ceil(maxVal / (magnitude / 2)) * (magnitude / 2);
+
+    function x(year) { return padL + (year / 30) * chartW; }
+    function y(val) { return padT + chartH - (val / maxVal) * chartH; }
+
+    const baseline = padT + chartH;
+
+    // Balance area (bottom stack)
+    let balancePts = yearly.map(function (d) { return x(d.year) + ',' + y(d.balance); });
+    let balancePath = 'M' + x(0) + ',' + baseline + ' L' + balancePts.join(' L') + ' L' + x(30) + ',' + baseline + ' Z';
+
+    // Granted area (stacked on top of balance)
+    let grantedTopPts = yearly.map(function (d) { return x(d.year) + ',' + y(d.granted + d.balance); });
+    let grantedBottomPts = yearly.slice().reverse().map(function (d) { return x(d.year) + ',' + y(d.balance); });
+    let grantedPath = 'M' + grantedTopPts.join(' L') + ' L' + grantedBottomPts.join(' L') + ' Z';
+
+    // Contributed line
+    let contribPts = yearly.map(function (d) { return x(d.year) + ',' + y(d.contributed); });
+    let contribPath = 'M' + contribPts.join(' L');
+
+    // Axis ticks every 5 years
+    let axisTicks = '';
+    [0, 5, 10, 15, 20, 25, 30].forEach(function (t) {
+      const tx = x(t);
+      axisTicks += '<line x1="' + tx + '" y1="' + baseline + '" x2="' + tx + '" y2="' + (baseline + 4) + '" stroke="var(--ink-soft)" stroke-width="1"/>';
+      axisTicks += '<text x="' + tx + '" y="' + (baseline + 16) + '" font-size="10" fill="var(--ink-soft)" text-anchor="' + (t === 0 ? 'start' : (t === 30 ? 'end' : 'middle')) + '" font-family="var(--font-body)">' + (t === 0 ? 'Start' : 'Yr ' + t) + '</text>';
+    });
+
+    const svg =
+      '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" height="220" xmlns="http://www.w3.org/2000/svg">' +
+        '<line x1="' + padL + '" y1="' + baseline + '" x2="' + (padL + chartW) + '" y2="' + baseline + '" stroke="var(--line)" stroke-width="1"/>' +
+        '<path d="' + balancePath + '" fill="var(--tcf-green-dark)" fill-opacity="0.85"/>' +
+        '<path d="' + grantedPath + '" fill="var(--tcf-aqua)" fill-opacity="0.9"/>' +
+        '<path d="' + contribPath + '" fill="none" stroke="var(--tcf-blue)" stroke-width="2" stroke-dasharray="5,4"/>' +
+        axisTicks +
+      '</svg>';
+
+    chartWrap.innerHTML = svg;
+  }
+
+  // ---------- Main recalculation ----------
+  function recalc() {
+    const amount = Math.max(0, parseFloat(giftAmountEl.value) || 0);
+    const years = parseInt(yearsEl.value, 10);
+    const returnPct = parseFloat(returnEl.value);
+    const payoutPct = parseFloat(payoutEl.value);
+    const peers = Math.max(1, parseInt(peersEl.value, 10) || 1);
+    const months = years * 12;
+    const mRate = returnPct / 100 / 12;
+
+    let indivContrib, indivFV;
+    if (giftType === 'monthly') {
+      indivContrib = amount * months;
+      indivFV = fvAnnuity(amount, mRate, months);
+    } else {
+      indivContrib = amount;
+      indivFV = fvLumpSum(amount, mRate, months);
+    }
+
+    const collContrib = indivContrib * peers;
+    const collFV = indivFV * peers;
+
+    individualTitle.textContent = giftType === 'monthly'
+      ? 'If you give for ' + years + (years === 1 ? ' year' : ' years')
+      : 'If you give once, over ' + years + (years === 1 ? ' year' : ' years');
+    individualContributed.textContent = fmtUSD(indivContrib);
+    individualFV.textContent = fmtUSD(indivFV);
+
+    collectiveTitle.textContent = 'With ' + peers.toLocaleString('en-US') + ' people giving like you';
+    collectiveContributed.textContent = fmtUSD(collContrib);
+    collectiveFV.textContent = fmtUSD(collFV);
+    peersBreak.textContent = peers.toLocaleString('en-US');
+
+    // Perpetuity simulation — collective basis, fixed 30-year window
+    const periodicAgg = amount * peers;
+    const yearly = simulateEndowment(giftType, periodicAgg, years, returnPct, payoutPct, 30);
+    const last = yearly[yearly.length - 1];
+    const totalImpact = last.granted + last.balance;
+
+    totalImpact30.textContent = fmtUSD(totalImpact);
+    grantsBreak.textContent = fmtUSD(last.granted);
+    balanceBreak.textContent = fmtUSD(last.balance);
+
+    if (!perpetuitySection.classList.contains('hidden')) {
+      renderChart(yearly);
+    } else {
+      // pre-render so first open isn't empty on slow interactions
+      renderChart(yearly);
+    }
+  }
+
+  // ---------- Init ----------
+  syncPresetActive();
+  recalc();
+})();
+</script>
+
+</body>
+</html>
