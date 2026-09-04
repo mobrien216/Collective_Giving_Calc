@@ -32,6 +32,7 @@
 
   :root {
     --tcf-green-dark:  #164430;
+    --tcf-green-light: #5FA98A;
     --tcf-orange:      #EE7331;
     --tcf-aqua:        #19B9A9;
     --tcf-blue:        #1A8DA9;
@@ -108,6 +109,25 @@
     padding: var(--space-5);
   }
   .panel-blue { border: 1.5px solid var(--tcf-blue); }
+  .left-col { display: flex; flex-direction: column; gap: var(--space-4); }
+
+  .growth-chart-panel {
+    background: var(--paper);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    padding: var(--space-5);
+  }
+  .growth-chart-head {
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: var(--space-2);
+    margin-bottom: var(--space-3);
+  }
+  .growth-chart-head h3 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 16px;
+    margin: 0;
+  }
 
   .eyebrow {
     font-family: var(--font-sub);
@@ -402,6 +422,28 @@
     padding-top: var(--space-4);
     border-top: 1px solid var(--line);
   }
+
+  /* ---------- Mobile ---------- */
+  @media (max-width: 640px) {
+    .wrap { padding: 0 var(--space-4); }
+    .app-bar { padding: var(--space-3) 0; }
+    .app-bar h1 { font-size: 19px; }
+    .app-bar p { font-size: 13px; }
+    main.calc-wrap { padding: var(--space-4) 0; }
+    .calc-grid { gap: var(--space-4); }
+    .panel, .growth-chart-panel { padding: var(--space-4); }
+    .panel-title { font-size: 17px; }
+    .result-card { padding: var(--space-4); }
+    .stat-value { font-size: 22px; }
+    .perpetuity-cta { font-size: 13px; padding: 10px 16px; }
+    .perpetuity-banner { padding: var(--space-4); }
+    .perpetuity-banner h2 { font-size: 20px; }
+    .perpetuity-body { padding: var(--space-4); }
+    .impact-total { gap: var(--space-4); }
+    .impact-total .headline .num { font-size: 28px; }
+    .chart-legend { gap: var(--space-3); font-size: 12px; }
+    .growth-chart-head { flex-direction: column; align-items: flex-start; }
+  }
 </style>
 </head>
 <body>
@@ -417,58 +459,65 @@
   <div class="wrap">
     <div class="calc-grid">
 
-      <!-- INPUT PANEL -->
-      <section class="panel panel-blue">
-        <p class="eyebrow">Your gift</p>
-        <h2 class="panel-title">Build your scenario</h2>
+      <!-- INPUT PANEL (left column) -->
+      <div class="left-col">
+        <section class="panel panel-blue">
+          <p class="eyebrow">Your gift</p>
+          <h2 class="panel-title">Build your scenario</h2>
 
-        <div class="field">
-          <div class="toggle" role="group" aria-label="Gift frequency">
-            <button type="button" id="btnMonthly" class="active">Monthly</button>
-            <button type="button" id="btnOnetime">One-time</button>
+          <div class="field">
+            <div class="toggle" role="group" aria-label="Gift frequency">
+              <button type="button" id="btnMonthly" class="active">Monthly</button>
+              <button type="button" id="btnOnetime">One-time</button>
+            </div>
           </div>
-        </div>
 
-        <div class="field">
-          <div class="field-label"><span>Gift amount</span></div>
-          <div class="amount-input">
-            <span class="prefix">$</span>
-            <input type="number" id="giftAmount" value="50" min="1" step="1">
-            <span class="suffix" id="amountSuffix">/ month</span>
+          <div class="field">
+            <div class="field-label"><span>Gift amount</span></div>
+            <div class="amount-input">
+              <span class="prefix">$</span>
+              <input type="number" id="giftAmount" value="50" min="1" step="1">
+              <span class="suffix" id="amountSuffix">/ month</span>
+            </div>
+            <div class="preset-row">
+              <button type="button" class="preset-btn active" data-amount="25">$25</button>
+              <button type="button" class="preset-btn" data-amount="50">$50</button>
+              <button type="button" class="preset-btn" data-amount="100">$100</button>
+              <button type="button" class="preset-btn" data-amount="250">$250</button>
+              <button type="button" class="preset-btn" data-amount="500">$500</button>
+            </div>
           </div>
-          <div class="preset-row">
-            <button type="button" class="preset-btn active" data-amount="25">$25</button>
-            <button type="button" class="preset-btn" data-amount="50">$50</button>
-            <button type="button" class="preset-btn" data-amount="100">$100</button>
-            <button type="button" class="preset-btn" data-amount="250">$250</button>
-            <button type="button" class="preset-btn" data-amount="500">$500</button>
+
+          <div class="field">
+            <div class="field-label"><span>Time horizon</span><span class="value text-blue" id="yearsValue">5 years</span></div>
+            <input type="range" id="years" min="1" max="30" step="1" value="5">
+            <div class="range-ticks" id="yearTicks"></div>
           </div>
-        </div>
 
-        <div class="field">
-          <div class="field-label"><span>Time horizon</span><span class="value text-blue" id="yearsValue">5 years</span></div>
-          <input type="range" id="years" min="1" max="30" step="1" value="5">
-          <div class="range-ticks" id="yearTicks"></div>
-        </div>
-
-        <div class="field">
-          <div class="field-label"><span>Expected annual return</span><span class="value text-blue" id="returnValue">8.5%</span></div>
-          <input type="range" id="returnRate" min="7" max="12" step="0.5" value="8.5">
-          <div class="range-endpoints"><span>7%</span><span>12%</span></div>
-          <p class="field-caption">Compounded monthly</p>
-        </div>
-
-        <div class="field">
-          <div class="field-label"><span class="text-aqua">Giving alongside others?</span></div>
-          <div class="peers-input">
-            <input type="number" id="peers" value="80" min="1" step="1">
-            <span class="suffix" style="color:var(--ink-soft); font-size:13px;">people, including you</span>
+          <div class="field">
+            <div class="field-label"><span>Expected annual return</span><span class="value text-blue" id="returnValue">8.5%</span></div>
+            <input type="range" id="returnRate" min="7" max="12" step="0.5" value="8.5">
+            <div class="range-endpoints"><span>7%</span><span>12%</span></div>
+            <p class="field-caption">Compounded monthly</p>
           </div>
-          <p class="field-caption">Optional — set to 1 if it's just you</p>
-        </div>
-      </section>
 
-      <!-- RESULTS -->
+          <div class="field">
+            <div class="field-label"><span class="text-aqua">Giving alongside others?</span></div>
+            <div class="peers-input">
+              <input type="number" id="peers" value="80" min="1" step="1">
+              <span class="suffix" style="color:var(--ink-soft); font-size:13px;">people, including you</span>
+            </div>
+            <p class="field-caption">Optional — set to 1 if it's just you</p>
+          </div>
+        </section>
+
+        <button type="button" class="perpetuity-cta" id="perpetuityToggle" aria-expanded="false" aria-controls="perpetuitySection">
+          <span>Make this an endowment</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+      </div>
+
+      <!-- RESULTS (right column) -->
       <section class="results-col">
         <div class="result-cards">
           <div class="result-card light">
@@ -498,10 +547,16 @@
           </div>
         </div>
 
-        <button type="button" class="perpetuity-cta" id="perpetuityToggle" aria-expanded="false" aria-controls="perpetuitySection">
-          <span>See this as a permanent endowment</span>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-        </button>
+        <div class="growth-chart-panel">
+          <div class="growth-chart-head">
+            <h3>Your growth over time</h3>
+            <div class="chart-legend">
+              <span class="item"><span class="swatch" style="background:var(--tcf-green-dark)"></span>You contributed</span>
+              <span class="item"><span class="swatch" style="background:var(--tcf-green-light)"></span>Investment growth</span>
+            </div>
+          </div>
+          <div class="chart-wrap" id="growthChartWrap"></div>
+        </div>
       </section>
 
     </div>
@@ -577,6 +632,7 @@
   const perpetuityToggle = document.getElementById('perpetuityToggle');
   const perpetuitySection = document.getElementById('perpetuitySection');
   const chartWrap = document.getElementById('chartWrap');
+  const growthChartWrap = document.getElementById('growthChartWrap');
   const totalImpact30 = document.getElementById('totalImpact30');
   const grantsBreak = document.getElementById('grantsBreak');
   const balanceBreak = document.getElementById('balanceBreak');
@@ -613,6 +669,23 @@
       }
     }
     return yearly;
+  }
+  function growthSeries(type, amount, years, annualReturnPct) {
+    const mRate = annualReturnPct / 100 / 12;
+    const series = [{ year: 0, contributed: 0, total: 0 }];
+    for (let yr = 1; yr <= years; yr++) {
+      const m = yr * 12;
+      let contributed, total;
+      if (type === 'monthly') {
+        contributed = amount * m;
+        total = fvAnnuity(amount, mRate, m);
+      } else {
+        contributed = amount;
+        total = fvLumpSum(amount, mRate, m);
+      }
+      series.push({ year: yr, contributed: contributed, total: total });
+    }
+    return series;
   }
 
   // ---------- Tick marks for time horizon (every 5 years) ----------
@@ -680,7 +753,7 @@
     } else {
       perpetuitySection.classList.add('hidden');
       perpetuityToggle.setAttribute('aria-expanded', 'false');
-      perpetuityToggle.querySelector('span').textContent = 'See this as a permanent endowment';
+      perpetuityToggle.querySelector('span').textContent = 'Make this an endowment';
     }
   });
 
@@ -737,6 +810,61 @@
     chartWrap.innerHTML = svg;
   }
 
+  function renderGrowthChart(series) {
+    const W = 560, H = 170, padL = 4, padR = 4, padT = 10, padB = 20;
+    const chartW = W - padL - padR;
+    const chartH = H - padT - padB;
+    const years = series[series.length - 1].year;
+
+    let maxVal = 0;
+    series.forEach(function (d) { maxVal = Math.max(maxVal, d.total); });
+    if (maxVal <= 0) maxVal = 1;
+    const magnitude = Math.pow(10, Math.floor(Math.log10(maxVal)));
+    maxVal = Math.ceil(maxVal / (magnitude / 2)) * (magnitude / 2);
+
+    function x(year) { return padL + (years === 0 ? 0 : (year / years) * chartW); }
+    function y(val) { return padT + chartH - (val / maxVal) * chartH; }
+    const baseline = padT + chartH;
+
+    // Contributed area (bottom stack, dark green)
+    let contribPts = series.map(function (d) { return x(d.year) + ',' + y(d.contributed); });
+    let contribPath = 'M' + x(0) + ',' + baseline + ' L' + contribPts.join(' L') + ' L' + x(years) + ',' + baseline + ' Z';
+
+    // Growth area (stacked on top, light green) = total - contributed
+    let growthTopPts = series.map(function (d) { return x(d.year) + ',' + y(d.total); });
+    let growthBottomPts = series.slice().reverse().map(function (d) { return x(d.year) + ',' + y(d.contributed); });
+    let growthPath = 'M' + growthTopPts.join(' L') + ' L' + growthBottomPts.join(' L') + ' Z';
+
+    // Tick step: keep to ~6 labels max
+    let step = 1;
+    if (years > 6) step = Math.ceil(years / 6);
+    const niceSteps = [1, 2, 5, 10];
+    step = niceSteps.find(function (s) { return s >= step; }) || 10;
+
+    let axisTicks = '';
+    for (let t = 0; t <= years; t += step) {
+      const tx = x(t);
+      axisTicks += '<line x1="' + tx + '" y1="' + baseline + '" x2="' + tx + '" y2="' + (baseline + 4) + '" stroke="var(--ink-soft)" stroke-width="1"/>';
+      axisTicks += '<text x="' + tx + '" y="' + (baseline + 15) + '" font-size="10" fill="var(--ink-soft)" text-anchor="' + (t === 0 ? 'start' : (t === years ? 'end' : 'middle')) + '" font-family="var(--font-body)">' + (t === 0 ? 'Start' : 'Yr ' + t) + '</text>';
+    }
+    // always label the final year if it wasn't hit by the step loop
+    if ((years % step) !== 0) {
+      const tx = x(years);
+      axisTicks += '<line x1="' + tx + '" y1="' + baseline + '" x2="' + tx + '" y2="' + (baseline + 4) + '" stroke="var(--ink-soft)" stroke-width="1"/>';
+      axisTicks += '<text x="' + tx + '" y="' + (baseline + 15) + '" font-size="10" fill="var(--ink-soft)" text-anchor="end" font-family="var(--font-body)">Yr ' + years + '</text>';
+    }
+
+    const svg =
+      '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" height="170" xmlns="http://www.w3.org/2000/svg">' +
+        '<line x1="' + padL + '" y1="' + baseline + '" x2="' + (padL + chartW) + '" y2="' + baseline + '" stroke="var(--line)" stroke-width="1"/>' +
+        '<path d="' + contribPath + '" fill="var(--tcf-green-dark)" fill-opacity="0.9"/>' +
+        '<path d="' + growthPath + '" fill="var(--tcf-green-light)" fill-opacity="0.85"/>' +
+        axisTicks +
+      '</svg>';
+
+    growthChartWrap.innerHTML = svg;
+  }
+
   // ---------- Main recalculation ----------
   function recalc() {
     const amount = Math.max(0, parseFloat(giftAmountEl.value) || 0);
@@ -764,6 +892,8 @@
       : 'If you give once, over ' + years + (years === 1 ? ' year' : ' years');
     individualContributed.textContent = fmtUSD(indivContrib);
     individualFV.textContent = fmtUSD(indivFV);
+
+    renderGrowthChart(growthSeries(giftType, amount, years, returnPct));
 
     collectiveTitle.textContent = 'With ' + peers.toLocaleString('en-US') + ' people giving like you';
     collectiveContributed.textContent = fmtUSD(collContrib);
